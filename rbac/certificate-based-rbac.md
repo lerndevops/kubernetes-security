@@ -11,9 +11,9 @@ cd /home/certs
 
 > **Create a private key for your user. In this example, we will name the file user1.key:**
 
-```
-openssl genrsa -out user1.key 2048 ; ls -l
+`openssl genrsa -out user1.key 2048 ; ls -l`
 
+```
 root@mnode:~# openssl genrsa -out user1.key 2048 ; ls -l 
 total 20
 -rw-------  1 root root 1704 Jul 25 09:15 user1.key
