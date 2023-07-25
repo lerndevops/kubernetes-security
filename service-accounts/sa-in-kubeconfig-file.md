@@ -1,8 +1,4 @@
-## get the K8S Server URL
-```
-root@kube-master:~# more /etc/kubernetes/admin.conf | grep server:
-    server: https://192.168.198.147:6443
-```
+## using serviceaccount token in kubeconfig file      ** NOT RECOMENDED ** 
 
 > Kubernetes 1.24 removed the automatic creation of secrets for new service accounts. starting 1.24 versions, including Kubernetes v1.27, API credentials are obtained directly by using the [TokenRequest](https://kubernetes.io/docs/reference/kubernetes-api/authentication-resources/token-request-v1/) API, and are mounted into Pods using a volume. The tokens obtained using this method have bounded lifetimes, and are automatically invalidated when the Pod they are mounted into is deleted.
 
@@ -10,11 +6,79 @@ root@kube-master:~# more /etc/kubernetes/admin.conf | grep server:
 
 > This API simplifies the process and enhances cluster security. Embrace these changes to enjoy a smoother Kubernetes experience with improved access control. 
 
-## create serviceaccount scoped to any namespace 
-`kubectl create namespace dev`
-`kubectl create sa testsa -n dev`
+### create serviceaccount scoped to any namespace 
 
-## the token with a service account can be obtained only be attaching service account to a POD 
+- kubectl create namespace dev
+
+- kubectl create sa testsa -n dev
+
+#### Creating Long-Lived Token
+
+> **Create a secret and specify the name of the service account as annotations within the metadata section.**
+
+```
+vi testsa-secret.yaml 
+
+apiVersion: v1
+kind: Secret
+metadata:
+    name: testsa-secret
+    namespace: dev
+    annotations:
+       kubernetes.io/service-account.name: testsa
+type: kubernetes.io/service-account-token
+
+save & close the file
+
+kubectl apply -f testsa-secret.yaml
+```
+
+## get the secret associated with serviceaccount 
+
+`kubectl describe serviceaccount testsa -n dev`
+
+```
+root@mnode:~# kubectl describe sa testsa
+Name:                testsa
+Namespace:           dev
+Labels:              <none>
+Annotations:         <none>
+Image pull secrets:  <none>
+Mountable secrets:   <none>
+Tokens:              testsa-secret
+Events:              <none>
+```
+
+## Token Value is our secrect
+
+`kubectl describe secret testsa-secret -n dev`
+
+```
+root@mnode:~# kubectl describe secret testsa-secret
+Name:         testsa-token
+Namespace:    dev
+Labels:       <none>
+Annotations:  kubernetes.io/service-account.name: testsa
+              kubernetes.io/service-account.uid: 5e3e86bc-f0ef-418d-b115-1c747f26fcbb
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     1107 bytes
+namespace:  7 bytes
+token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IkpoMGpiWFUtVmRUcFhKNFItQ2Y2b3NiUHRFbzJSaEtJbGl0NGFWeFFPV3MifQeyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InRlc3RzYS10b2tlbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJ0ZXN0c2EiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1ZTNlODZiYy1mMGVmLTQxOGQtYjExNS0xYzc0N2YyNmZjYmIiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDp0ZXN0c2EifQNlxHFgLwb8xyEFsSBFDwOs5kqeTJVT7TrjWbCwfv3x1k6RHZzmQOEerdjEl9V95ciLNtTECVHFUp4XrcU2g-Fov1fsGJgYG6WJO7IrL2b9k-kB81Sg7aluSM7I3EqcoA1rk8aCNzpmg_I2SDaNblAg-f68fjWyl_TYdajCpHk4pcWbv7gJD4nXTEmLGRHqFQzaml41Zh05WW8PYdciIj6z7dd6i8va_EIj5TFcJhodkQTSyICEPn0hlFlvpXTCquR1Zcz8N2MEuSS4JORUtNHBbKt-riNTkvedXuPSLxuHO3Y3Cy2JktMj0azTNBwNwFBqaSKUU1Nbp1lfnKlJ7X6Q
+```
+
+#### as we can see above the screct is associated with ca.crt & a token, we can extract them and use in `config` file to connect to the cluster 
+
+### Follow below to extract the values 
+```
+kubectl -n dev get secret/testsa-token-bg4xc -o jsonpath='{.data.ca\.crt}' > ca.crt
+kubectl -n dev get secret/testsa-token -o jsonpath='{.data.token}' | base64 --decode > testsa.key
+kubectl get secret/testsa-token-bg4xc -o jsonpath='{.data.namespace}' | base64 --decode
+```
+
 ## create kube config file as below 
 
 `replace the ca, token & server with content of ca.crt, testuser.key & server url accordingly`
@@ -34,10 +98,10 @@ contexts:
   context:
     cluster: kube-cluster
     namespace: kube-system
-    user: testuser
+    user: testsa
 current-context: dev
 users:
-- name: testuser
+- name: testsa
   user:
     token: ${token}
 ```
@@ -89,8 +153,8 @@ ERBTUZM42GWO7ySHL4INQbUfm17pypeIW_F9K3awgVZS9oWbMeojV7BjEsFmMpR1ZPlI6ugwBZxJag
 
 ```
 root@kube-master:/home/devops/# kubectl --kubeconfig testuser.conf version --short
-Client Version: v1.17.0
-Server Version: v1.17.0
+Client Version: v1.27.0
+Server Version: v1.27.0
 ```
 
 ### validate testuser authorization 
@@ -99,7 +163,7 @@ root@kube-master:/home/devops/.kube# kubectl --kubeconfig testuser.conf get node
 Error from server (Forbidden): nodes is forbidden: User "system:serviceaccount:kube-system:testuser" cannot list resource "nodes" in API group "" at the cluster scope
 ```
 
-` the above Error is expected as we just authenticated with apiserver, but we haven't defined what testuser can perform ` 
+`the above Error is expected as we just authenticated with apiserver, but we haven't defined what testuser can perform` 
 
 
 ## Role Based Access Control ( RBAC ) 
@@ -107,105 +171,62 @@ Error from server (Forbidden): nodes is forbidden: User "system:serviceaccount:k
 ### define a Role -- what can be done 
 
 ```
-	apiVersion: rbac.authorization.k8s.io/v1
-	kind: Role
-	metadata:
-	namespace: kube-system
-	name: readonly-role
-	rules:
-	- apiGroups: ["*"] # "" indicates the core API group
-	resources: ["pods","deployments", "replicasets"]
-	verbs: ["get", "watch", "list"]
-	#verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+vi testsa-role.yaml 
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dev
+  name: readonly-role
+rules:
+  - apiGroups: ["*"] # "" indicates the core API group
+    resources: ["pods","deployments", "replicasets"]
+    verbs: ["get", "watch", "list"]
+    #verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+save, close the file & apply 
+
+kubectl apply -f testsa-role.yaml
+
 ``` 
 
-### define a rolebinding ( bind role to a user, gives the user set of permmissions )
+### define a rolebinding ( bind role to a user/serviceaccount, gives the user set of permmissions )
 
 ```
-	apiVersion: rbac.authorization.k8s.io/v1
-	# This role binding allows "testuser" to read pods in the "kube-system" namespace.
-	kind: RoleBinding
-	metadata:
-	name: readonly-binding
-	namespace: kube-system
-	subjects:
-	- kind: ServiceAccount
-	name: testuser # Name is case sensitive
-	namespace: kube-system
-	roleRef:
-	kind: Role #this must be Role or ClusterRole
-	name: readonly-role # this must match the name of the Role or ClusterRole you wish to bind to
-	apiGroup: rbac.authorization.k8s.io
+vi testsa-rb.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+# This role binding allows "testuser" to read pods in the "kube-system" namespace.
+kind: RoleBinding
+metadata:
+  name: readonly-binding
+  namespace: dev
+subjects:
+  - kind: ServiceAccount
+    name: testsa # Name is case sensitive
+    namespace: dev
+roleRef:
+  kind: Role #this must be Role or ClusterRole
+  name: readonly-role # this must match the name of the Role or ClusterRole you wish to bind to
+  apiGroup: rbac.authorization.k8s.io
+
+save,close & apply the file 
+
+kubectl apply -f testsa-rb.yaml
 ```
 
 ## validate able to list deployments, pods replicasets 
 
 ```
-root@kube-master:/home/devops/.kube# kubectl --kubeconfig testuser.conf get deploy
+root@kube-master:/home/devops/.kube# kubectl --kubeconfig testuser.conf get deployment
 NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
 calico-kube-controllers   1/1     1            1           3d19h
 coredns                   2/2     2            2           3d19h
 ```
+
 ```
-root@kube-master:/home/devops/.kube# kubectl --kubeconfig testuser.conf get rs
+root@kube-master:/home/devops/.kube# kubectl --kubeconfig testuser.conf get replicaset
 NAME                                 DESIRED   CURRENT   READY   AGE
 calico-kube-controllers-778676476b   1         1         1       3d19h
 coredns-6955765f44                   2         2         2       3d19h
-```
-
-
-## Below is Just FYI 
-
-> Versions of Kubernetes before v1.22 automatically created long term credentials for accessing the Kubernetes API. This older mechanism was based on creating token Secrets that could then be mounted into running Pods.
-
-## get the service account token in old versions of kubernetes 
-
-## create serviceaccount scoped to any namespace 
-
-`kubectl create namespace dev`
-`kubectl create serviceaccount testsa -n dev` 
-
-## get the secret associated with serviceaccount 
-`kubectl describe serviceaccount testsa -n dev`
-
-```
-root@kube-master:~# kubectl describe sa testsa -n kube-system
-Name:                testsa
-Namespace:           dev
-Labels:              <none>
-Annotations:         <none>
-Image pull secrets:  <none>
-Mountable secrets:   `testsa-token-bg4xc`
-Tokens:              `testsa-token-bg4xc`
-Events:              <none>
-```
-
-## Token Value is our secrect
-
-`kubectl describe secret testsa-token-bg4xc -n kube-system`
-
-```
-root@kube-master:~# kubectl describe secret testsa-token-bg4xc -n dev
-Name:         testsa-token-bg4xc
-Namespace:    dev
-Labels:       <none>
-Annotations:  kubernetes.io/service-account.name: testsa
-              kubernetes.io/service-account.uid: a88e2e84-60cb-41d8-aa53-cb0ea4de3ebb
-
-Type:  kubernetes.io/service-account-token
-
-Data
-====
-token:      eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1fZF9rOEJMVmd3NFp2bUotSWVQdHZ6YlpEazk0TnBCOTVnMjJVQmlRTTAifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJ0ZXN0dXNlci10b2tlbi1iZzR4YyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJ0ZXN0dXNlciIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImE4OGUyZTg0LTYwY2ItNDFkOC1hYTUzLWNiMGVhNGRlM2ViYiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTp0ZXN0dXNlciJ9.fxMihqmqk9GJ8VZ72w6g4Ppfrmnr4NYV6qo-WH_o9mFUYjntggMugJtF5SbocwXCIF5AXbyxYWFRye_Nr8vFYLRpcB9GT4FT3QXctp3zpm6pDYpW2aK4GpoM1wqksNbGeoibwhYHdaqsv7CIUfzYnwkYYOEP_AggLCrfp4h3Div_uQt-mlgp4ti_pq5ex-l4kH03kK6cIAHjP22CfdipIUwE_Xh5ssarQmiqq4iB8COq3W9tUIvsCYJBxgPsQk-fqoM9pfRqERBTUZM42GWO7ySHL4INQbUfm17pypeIW_F9K3awgVZS9oWbMeojV7BjEsFmMpR1ZPlI6ugwBZxJag
-ca.crt:     1025 bytes
-namespace:  11 bytes
-```
-
-#### as we can see above the screct is associated with ca.crt & a token, we can extract them and use in `config` file to connect to the cluster 
-
-### Follow below to extract the values 
-```
-kubectl -n kube-system get secret/testsa-token-bg4xc -o jsonpath='{.data.ca\.crt}' > ca.crt
-kubectl -n kube-system get secret/testsa-token-bg4xc -o jsonpath='{.data.token}' | base64 --decode > testsa.key
-kubectl get secret/testsa-token-bg4xc -o jsonpath='{.data.namespace}' | base64 --decode
 ```
