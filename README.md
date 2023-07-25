@@ -1,4 +1,4 @@
-# Kubernetes Secutiry 
+# Kubernetes Cluster Secutiry 
 
 ## Controlling access to the Kubernetes API
 
