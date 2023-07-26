@@ -47,7 +47,7 @@ total 20
 	-rw-r--r-- 1 root root 1017 Jan  8 01:52 user1.crt
 ```
 
-### step4: Create kubeconfig file using kubectl 
+## step4: Create kubeconfig file using kubectl 
 
 > ***Add cluster details to configuration file:***
  
@@ -75,9 +75,7 @@ total 20
 	Server Version: v1.27.0
 ```
 
-## Providing the Authorization to user1
-
-
+## step5: Providing the Authorization to user1
 
 * vi rbac-user1.yaml 
 
