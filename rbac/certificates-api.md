@@ -2,7 +2,7 @@
 
 > Kubernetes does not have API Objects for User Accounts. Of the available ways to manage authentication. we will use ***OpenSSL certificates*** for their simplicity. 
 
-## setp1: create a private/public keypair 
+## step1: create a private/public keypair 
 
 > **Create a directory to place certificates**
 
@@ -22,7 +22,7 @@ total 20
 
 ```
 
-## setp2: create a CSR
+## step2: create a CSR
 
 > **Create a certificate sign request `user007.csr` using the private key we just created (user007.key in this example).** 
 
@@ -31,7 +31,7 @@ total 20
    `openssl req -new -key user007.key -out user007.csr -subj "/CN=user007/O=devops"`
 
 
-## setp3: Send CSR to API Server using Certificates API & get it approved with kubernetes CA 
+## step3: Send CSR to API Server using Certificates API & get it approved with kubernetes CA 
 
 ##### use the below file to send the CSR to API, ensure to convert the CSR file to base64 encoding before palcing in to file 
 ```
@@ -83,7 +83,7 @@ user007   96s   kubernetes.io/kube-apiserver-client   kubernetes-admin   <none> 
 
 > **kubectl get csr user007 -o jsonpath="{.status.certificate}" | base64 --decode > user007.crt**
 
-## setp5: Create kubeconfig file using kubectl 
+## step5: Create kubeconfig file using kubectl 
 
 > ***Add cluster details to configuration file:***
  
