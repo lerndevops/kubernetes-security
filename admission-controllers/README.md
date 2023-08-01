@@ -53,6 +53,7 @@
 > **User Configured controllers that can modify or reject API requests based on custom logic**
 
 > **Dynamic admission controllers can be of 3 types** 
+
      * ImagePolicyWebhook         -- Controls admission for a particular container image
      * MutatingAdmissionWEbhook.  -- Modifies the object received before it persist 
      * ValidatingAdmissionWebhook -- Accepts or Rejects admission requests validation
