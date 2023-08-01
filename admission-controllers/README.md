@@ -44,23 +44,28 @@
      * adding resource limits or validating resource limits 
      * enforce not using latest tag for production 
 
-## Built In Admission Controllers
-
-#### [Built-in-Admission-Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+## Admission Controllers
 
 ### `Static Admission Controllers` 
 > **Static admission controllers are admission controllers that are built-in and provided by Kubernetes itself. Not all of them are enabled by default**
 
 ### `Dynamic Admission Controllers`
-> **Dynamic admission control is a mechanism in which we inject our custom-built business logic into the admission control pipeline.**
+> **User Configured controllers that can modify or reject API requests based on custom logic**
 
-> **Dynamic admission controllers can be of two types – `validating` and `mutating`. They can be used separately and together.** 
+> **Dynamic admission controllers can be of 3 types** 
+     * ImagePolicyWebhook         -- Controls admission for a particular container image
+     * MutatingAdmissionWEbhook.  -- Modifies the object received before it persist 
+     * ValidatingAdmissionWebhook -- Accepts or Rejects admission requests validation
+
+> **A Webhook is a standard interface that listens to API Server incoming requests and responds with the results**
 
 > **To implement dynamic admission controllers, you must configure the API server first with a change to the `--enable-admission-plugins`.**
 
 ```
 --enable-admission-plugins=...,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
 ```
+#### [Built-in-Admission-Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+
 ![Built-in-Admission-Controllers](https://github.com/lerndevops/kubernetes-security/blob/main/img/built-in-admission-controllers.png)
 
 ### `Admission Controller Phases`
