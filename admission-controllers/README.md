@@ -44,7 +44,7 @@
      * adding resource limits or validating resource limits 
      * enforce not using latest tag for production 
 
-## Admission Controllers
+## Different Admission Controllers
 
 ### `Static Admission Controllers` 
 > **Static admission controllers are admission controllers that are built-in and provided by Kubernetes itself. Not all of them are enabled by default**
@@ -54,9 +54,9 @@
 
 > **Dynamic admission controllers can be of 3 types** 
 
-     * ImagePolicyWebhook         -- Controls admission for a particular container image
-     * MutatingAdmissionWEbhook.  -- Modifies the object received before it persist 
-     * ValidatingAdmissionWebhook -- Accepts or Rejects admission requests validation
+  * **ImagePolicyWebhook**         -- Controls admission for a particular container image
+  * **MutatingAdmissionWEbhook**   -- Modifies the object received before it persist 
+  * **ValidatingAdmissionWebhook** -- Accepts or Rejects admission requests validation
 
 > **A Webhook is a standard interface that listens to API Server incoming requests and responds with the results**
 
@@ -65,9 +65,7 @@
 ```
 --enable-admission-plugins=...,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
 ```
-#### [Built-in-Admission-Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
-
-![Built-in-Admission-Controllers](https://github.com/lerndevops/kubernetes-security/blob/main/img/built-in-admission-controllers.png)
+### [Find-All-Built-in-Admission-Controllers-Documentation](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
 
 ### `Admission Controller Phases`
 
@@ -79,16 +77,3 @@
 4) **No limitation on `Read` Objects like `get`**  
 
 ![Admission-Controllers-phases](https://github.com/lerndevops/kubernetes-security/blob/main/img/admission-controller-phases.png)
-
-
-
-
-
-
-
-### Benefits of Kubernetes Admission Controller
-
-#### Extended Security Controls
-#### Company-Wide Guardrails
-#### Preventive Capabilities
-#### Highly customizable
