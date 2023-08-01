@@ -44,8 +44,27 @@
      * adding resource limits or validating resource limits 
      * enforce not using latest tag for production 
 
+## Built In Admission Controllers
 
-### Admission Controller Phases
+#### [Built-in-Admission-Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+
+### `Static Admission Controllers` 
+> **Static admission controllers are admission controllers that are built-in and provided by Kubernetes itself. Not all of them are enabled by default**
+
+### `Dynamic Admission Controllers`
+> **Dynamic admission control is a mechanism in which we inject our custom-built business logic into the admission control pipeline.**
+
+> **Dynamic admission controllers can be of two types – `validating` and `mutating`. They can be used separately and together.** 
+
+> **To implement dynamic admission controllers, you must configure the API server first with a change to the `--enable-admission-plugins`.**
+
+```
+--enable-admission-plugins=...,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
+```
+![Built-in-Admission-Controllers](https://github.com/lerndevops/kubernetes-security/blob/main/img/built-in-admission-controllers.png)
+
+### `Admission Controller Phases`
+
 1) **The admission Controller process proceeds in 2 phases**
     * 1st Phase -- **`mutating`** admission controller will run 
     * 2nd phase -- **`validating`** admission Controllers will run 
@@ -55,11 +74,7 @@
 
 ![Admission-Controllers-phases](https://github.com/lerndevops/kubernetes-security/blob/main/img/admission-controller-phases.png)
 
-### Built In Admission Controllers
 
-#### [Built-in-Admission-Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
-
-![Built-in-Admission-Controllers](https://github.com/lerndevops/kubernetes-security/blob/main/img/built-in-admission-controllers.png)
 
 
 
