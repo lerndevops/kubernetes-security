@@ -113,3 +113,4 @@
 
    3. Verify that you can access Kubernetes resources based on the assigned roles and group mappings.
    ```
+![kube-oidc](https://github.com/lerndevops/kubernetes-security/blob/main/img/kube-oidc.webp)
