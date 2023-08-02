@@ -1,0 +1,6 @@
+FROM python:3.9.17-slim
+RUN pip install requests jsonify flask jsonpatch
+RUN mkdir /opt/app
+WORKDIR /opt/app
+COPY mutating-webhook.py .
+CMD ["python3", "mutating-webhook.py"]

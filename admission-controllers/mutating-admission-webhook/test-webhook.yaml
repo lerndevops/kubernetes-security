@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-with-annotation
+  annotations:
+    author: naresh
+  labels:
+    app: with-annotation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: with-annotation
+  template:
+    metadata:
+      labels:
+        app: with-annotation
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-without-annotation
+  labels:
+    app: without-annotation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: without-annotation
+  template:
+    metadata:
+      labels:
+        app: without-annotation
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
