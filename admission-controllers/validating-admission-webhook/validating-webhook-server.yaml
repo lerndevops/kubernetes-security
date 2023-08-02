@@ -1,0 +1,44 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: validating-webhook-demo
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: validating-admission-webhook
+  ports:
+    - name: https
+      port: 443
+      targetPort: 443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: validating-webhook-server
+  name: validating-admission-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: validating-admission-webhook
+  template:
+    metadata:
+      labels:
+        app: validating-admission-webhook
+    spec:
+      volumes:
+        - name: certs
+          secret:
+           secretName: validating-webhook-tls
+      containers:
+        - name: vaws
+          image: lerndevops/samples:validation-webhook-server
+          #command: ["/bin/bash", "-c", "sleep 6000"]
+          ports:
+           - name: https
+             containerPort: 443
+          volumeMounts:
+           - name: certs
+             mountPath: /tmp/ssl
