@@ -5,22 +5,22 @@ metadata:
   namespace: default
 webhooks:
   - name: mutating-webhook-demo.default.svc
-    admissionReviewVersions: ["v1"]
+    admissionReviewVersions: ["v1beta1"]
     sideEffects: None
     clientConfig:
       service:
         name: mutating-webhook-demo
         namespace: default
-        path: /validate
+        path: /mutate/deployments
       caBundle: <PLACE-YOUR-WEBHOOK-SERVER_CA-HERE><MUST BE base64 encoded data>
     rules:
-      - apiGroups: 
+      - apiGroups:
           - "apps"
-          - ""
         resources:
           - "deployments"
-          - "pods"
         apiVersions:
           - "*"
         operations:
           - CREATE
+
+

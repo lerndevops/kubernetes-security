@@ -9,60 +9,58 @@ vi /etc/kubernetes/manifests/kube-apiserver.yaml
 
 > **Admission Webhooks need to be on SSL**
 
-`wget https://raw.githubusercontent.com/lerndevops/kubernetes-security/main/admission-controllers/mutating-admission-webhook/gencerts.sh -P $HOME`
+**`wget https://raw.githubusercontent.com/lerndevops/kubernetes-security/main/admission-controllers/mutating-admission-webhook/gencerts.sh -P $HOME`**
 
-`bash $HOME/gencerts.sh`
+**`bash $HOME/gencerts.sh`**
 
-`ls -l $HOME/ssl`
+**`ls -l $HOME/ssl`**
 
 ## Step3: Create secret with generated SSL Certs 
 
 > **this is requred to start webhook server**
 
-`kubectl create secret tls mutating-webhook-tls --cert $HOME/ssl/server.crt --key $HOME/ssl/server.key`
+**`kubectl create secret tls mutating-webhook-tls --cert $HOME/ssl/server.crt --key $HOME/ssl/server.key`**
 
 ## Step4: Deploy the Webhook Server 
 
-`kubectl apply -f https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/mutating-admission-webhook/mutating-webhook-server.yaml`
+**`kubectl apply -f https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/mutating-admission-webhook/mutating-webhook-server.yaml`**
 
 ## Step5: Deploy the Webhook Config 
 
 #### Download the file to local server 
 
-`wget https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/mutating-admission-webhook/mutating-webhook-config.yaml -P $HOME`
+**`wget https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/mutating-admission-webhook/mutating-webhook-config.yaml -P $HOME`**
 
 #### convert the ca.crt created in Step2 in to base64 format 
 
-`cat $HOME/ssl/ca.crt | base64 | tr -d "\n"`
+**`cat $HOME/ssl/ca.crt | base64 | tr -d "\n"`**
 
 #### copy the output & append in the mutating-webhook-config.yaml 
 
-`vi $HOME/mutating-webhook-config.yaml`
+**`vi $HOME/mutating-webhook-config.yaml`**
 
-`modify below section in file` 
+**`modify below section in file`**
 
-`caBundle: <PLACE-YOUR-WEBHOOK-SERVER_CA-HERE><MUST BE base64 encoded data>`
+**`caBundle: <PLACE-YOUR-WEBHOOK-SERVER_CA-HERE><MUST BE base64 encoded data>`**
 
 #### deploy the webhook configuration 
 
-`kubectl apply -f $HOME/mutating-webhook-config.yaml`
+**`kubectl apply -f $HOME/mutating-webhook-config.yaml`**
 
 ## Test the Webhook Working 
 
-> **Note that webhook server/config deployed will mandate that every deployment has an annotation with a key "author"**
-
-> **if no annotation with "author" in deployment definition it will be rejected**
+> **Note that webhook server/config deployed will update the labels as project: chandrayan for every deployment created**
 
 #### deployment 
 
-`kubectl apply -f https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/mutating-admission-webhook/test-webhook.yaml`
+**`kubectl apply -f https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/mutating-admission-webhook/test-webhook.yaml`**
 
-#### Expected Output
+#### validate Output
+
+**`kubectl get deployment mutation-test-deployment -o yaml | grep -v apiVersion | egrep -A 2 labels`**
 ```
-deployment.apps/deployment-with-annotation created
-
-Error from server: error when creating 
-"https://github.com/lerndevops/kubernetes-security/<>/mutating-admission-webhook/test-webhook.yaml": 
-
-admission webhook "mutating-webhook-demo.default.svc" denied the request: Not allowed without author annotations
+root@test-vm:~/# kubectl get deployment mutation-test-deployment -o yaml | grep -v apiVersion | egrep -A 2 labels
+  labels:
+    app: mutation
+    project: chandrayan
 ```
