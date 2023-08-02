@@ -55,5 +55,13 @@ vi /etc/kubernetes/manifests/kube-apiserver.yaml
 
 #### deployment 
 
-`https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/validating-admission-webhook/test-webhook.yaml`
+`kubectl apply -f https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/validating-admission-webhook/test-webhook.yaml`
 
+#### Expected Output
+```
+root@test-vm:~# kubectl apply -f https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/validating-admission-webhook/test-webhook.yaml
+
+deployment.apps/deployment-with-annotation created
+
+Error from server: error when creating "https://github.com/lerndevops/kubernetes-security/raw/main/admission-controllers/validating-admission-webhook/test-webhook.yaml": admission webhook "validating-webhook-demo.default.svc" denied the request: Not allowed without author annotations
+```
