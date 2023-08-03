@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: opa-allowed-image-repo-pod
+spec:
+  containers:
+    - name: opa
+      image: docker.io/library/nginx:latest
+      resources:
+        limits:
+          cpu: "100m"
+          memory: "30Mi"

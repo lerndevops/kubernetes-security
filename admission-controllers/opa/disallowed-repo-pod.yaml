@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: opa-disallowed-image-repo-pod
+spec:
+  containers:
+    - name: opa
+      image: public.ecr.aws/nginx/nginx:1.25
+      resources:
+        limits:
+          cpu: "100m"
+          memory: "30Mi"

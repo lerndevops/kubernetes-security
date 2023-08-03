@@ -42,6 +42,23 @@
 ## OPA Gatekeeper Implementation 
 
 1) **Install Gatekeeper**
+
+> [Install OPA Gatekeeper in kubernetes cluster](https://open-policy-agent.github.io/gatekeeper/website/docs/install/)
+
 2) **Create Constraint Template (uses Rego)**
-3) **Create Constraint CRD** 
+3) **Create Constraint resource** 
 4) **Create Deployment and Test Contstraint** 
+
+## [OPA Gatekeeper Library](https://open-policy-agent.github.io/gatekeeper-library/website/)
+
+> **A community-owned library of policies for the OPA Gatekeeper project.**
+
+### Validation and Mutation
+
+> **The library consists of two main components: `Validation` and `Mutation`.**
+
+>> **`Validation:` Gatekeeper can validate resources in the cluster against Gatekeeper validation policies, such as these defined in the library.**
+  * **The policies are defined as `ConstraintTemplates` and `Constraints`.**
+  * **`ConstraintTemplates` can be applied directly to a cluster and then `Constraints` can be applied to customize policy to fit your specific needs.**
+
+>> **`Mutation:` Gatekeeper can mutate resources in the cluster against the Gatekeeper mutation policies, such as these defined in the library. Mutation policies are only examples, they should be customized to meet your needs before being applied.**
