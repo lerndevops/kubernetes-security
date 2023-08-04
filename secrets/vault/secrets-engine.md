@@ -1,6 +1,6 @@
 ## Secrets engine
 
-### What is a secrets engine?
+## What is a secrets engine?
 ---
 > **Secrets engines are Vault components which store, generate or encrypt secrets/data** 
 
@@ -18,7 +18,7 @@
 
 ![scret-engine](https://github.com/lerndevops/kubernetes-security/blob/main/img/vault.png)
 
-### Secrets engines lifecycle
+## Secrets engines lifecycle
 ---
 > **Most secrets engines can be `enabled`, `disabled`, `tuned`, and moved via the CLI or API.**
 
