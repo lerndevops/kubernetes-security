@@ -26,7 +26,8 @@
 3) **Install the latest version of the Vault server running in development mode**
    ```
     helm install vault hashicorp/vault --set "server.dev.enabled=true"
-
+   ```
+   ```
     The Vault pod and Vault Agent Injector pod are deployed in the default namespace.**
 
     Development mode
