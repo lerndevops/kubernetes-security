@@ -39,7 +39,8 @@
    ```
 
 
-### Install Referece links 
+## Installation Referece links 
 
 1) https://developer.hashicorp.com/vault/downloads 
+
 2) https://developer.hashicorp.com/vault/docs/install
