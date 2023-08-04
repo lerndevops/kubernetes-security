@@ -31,7 +31,8 @@
 
     Development mode
 
-      Running a Vault server in development is automatically initialized and unsealed. This is ideal in a learning environment but NOT recommended for a production environment.
+      Running a Vault server in development is automatically initialized and unsealed. 
+      This is ideal in a learning environment but NOT recommended for a production environment.
    ```
 4) **Display all the pods in the default namespace.**
    ```
