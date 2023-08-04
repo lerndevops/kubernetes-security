@@ -42,4 +42,4 @@
 
 > With Vault, you can create tokens manually and assign them to your clients, or the clients can log in and obtain a token.
 
-![How does vault work](/lerndevops/kubernetes-security/blob/main/img/vault-flow.png)
+![How does vault work](https://github.com/lerndevops/kubernetes-security/blob/main/img/vault-flow.png)
