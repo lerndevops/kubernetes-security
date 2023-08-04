@@ -10,6 +10,10 @@
 2) API keys for external services, 
 3) credentials for service-oriented architecture communication, etc. 
 
+> **Vault comes with various pluggable components called secrets engines and authentication methods allowing you to integrate with external systems.**
+
+![vault](https://github.com/lerndevops/kubernetes-security/blob/main/img/vault.png)
+
 ## Why Vault? 
 
 > **Centrally store, access, and deploy secrets across applications, systems, and infrastructure.**
@@ -36,10 +40,10 @@
 
 ## How does vault work? 
 
-> Vault works primarily with tokens and a token is associated to the client's policy. 
+> **Vault works primarily with tokens and a token is associated to the client's policy.**
 
-> Each policy is path-based and policy rules constrains the actions and accessibility to the paths for each client. 
+> **Each policy is path-based and policy rules constrains the actions and accessibility to the paths for each client.**
 
-> With Vault, you can create tokens manually and assign them to your clients, or the clients can log in and obtain a token.
+> **With Vault, you can create tokens manually and assign them to your clients, or the clients can log in and obtain a token.**
 
 ![How does vault work](https://github.com/lerndevops/kubernetes-security/blob/main/img/vault-flow.png)
