@@ -18,7 +18,7 @@
 
 ![scret-engine](https://github.com/lerndevops/kubernetes-security/blob/main/img/vault.png)
 
-### Secrets engines lifecycle
+### Secrets engine lifecycle
 ---
 > **Most secrets engines can be `enabled`, `disabled`, `tuned`, and moved via the CLI or API.**
 
