@@ -1,16 +1,16 @@
 ### Create ServiceAccount Scoped to any Namespace 
 
-```
+```sh
 kubectl create sa testsa
+```
+```sh
 kubectl get sa testsa
 ```
-
 ### Map ServiceAccount to Pod 
-```
-use the pod yaml below to create Pod with ServiceAccount mapped
-
-vi sa-test-pod.yaml 
-
+```yaml
+# use the pod yaml below to create Pod with ServiceAccount mapped
+#vi sa-test-pod.yaml 
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -24,14 +24,13 @@ spec:
    - name: sa-test-pod
      image: lerndevops/samples:netshoot
     
-save & close the file 
- 
-kubectl create -f sa-test-pod.yaml
+#save & close the file 
+#kubectl create -f sa-test-pod.yaml
 ```
 
 ### Exec into the POD created 
 
-```
+```sh
 kubectl exec -it sa-test-pod -- /bin/bash
 ```
 
@@ -39,7 +38,7 @@ kubectl exec -it sa-test-pod -- /bin/bash
 
 ### validate the Service Account is Mounted with token 
 
-```
+```sh
 mount | grep sec
 
 tmpfs on /run/secrets/kubernetes.io/serviceaccount type tmpfs (ro,relatime,size=562756k)
@@ -65,9 +64,11 @@ vi2k_AnOIqQ5izjD1Sqyq1qgERYCGPOKPz9s_OPryDsXuGbLdkX32tD2j5-UOLP3sGpzI7NFXJjeLTRV
 
 > **Note: `"kubernetes"` is the deafult service under default namespace that points to APIServer always in any kube cluster**
 
-```
+```sh
 curl https://kubernetes.default.svc -k
-
+```
+```json
+# output looks as below
 {
   "kind": "Status",
   "apiVersion": "v1",
@@ -83,9 +84,11 @@ curl https://kubernetes.default.svc -k
 
 ### Lets send a request to API Server with the service account token 
 
-```
+```sh
 bash-5.1# curl https://kubernetes.default.svc -k -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImQwMjhkNmVhMGVhNGRjMGMz-Q3FEsLL4wTr...."
-
+```
+```json
+# output looks as below 
 {
   "kind": "Status",
   "apiVersion": "v1",
@@ -98,9 +101,11 @@ bash-5.1# curl https://kubernetes.default.svc -k -H "Authorization: Bearer eyJhb
 }
 ``` 
 
-```
+```sh
 curl https://kubernetes.default.svc/api/v1/namespaces/default/pods -k -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImQwMjhkNmVhMGVhNG..."
-
+```
+```json
+# out put looks as below
 {
   "kind": "Status",
   "apiVersion": "v1",
@@ -113,7 +118,6 @@ curl https://kubernetes.default.svc/api/v1/namespaces/default/pods -k -H "Author
   },
   "code": 403
 }
-
 ```
 ### we can now see the Service Account testsa sent a request successfully, but it is not authorized to perform the actions
 
@@ -125,19 +129,21 @@ curl https://kubernetes.default.svc/api/v1/namespaces/default/pods -k -H "Author
 
 ### For Namespace Scoped Access, we assing the Service Account to role using rolebinding as below
 
-```
+```sh
 # create role scoped to default namespace with read permissions
 kubectl create role testsa-role --namespace=default --verb=get,list,watch --resource="*.*"
-
+```
+```sh
 # assing the role to Service Account 
 kubectl create rolebinding testsa-rb --namespace=default --role=testsa-role --serviceaccount=default:testsa
 
 ```
 ### For Cluster Level Access, we assign the Service Account to clusterrole using clusterrolebinding as below 
-```
+```sh
 # create clusterrole with read permissions
 kubectl create clusterrole testsa-cr --verb=get,list,watch --resource="*.*"
-
+```
+```sh
 # assing the clusterrole to Service Account 
 kubectl create clusterrolebinding testsa-crb --clusterrole=testsa-cr --serviceaccount=default:testsa
 ```
