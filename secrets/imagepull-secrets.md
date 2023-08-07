@@ -104,3 +104,7 @@ spec:
         - name: webapp 
           image: lerndevops/kube:springboot-app
 ```
+
+### [Add ImagePullSecrets to a service account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#add-imagepullsecrets-to-a-service-account)
+
+### [You-can-find-More-Info-here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
