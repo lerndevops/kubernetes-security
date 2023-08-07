@@ -7,18 +7,20 @@
 > This API simplifies the process and enhances cluster security. Embrace these changes to enjoy a smoother Kubernetes experience with improved access control. 
 
 ### create serviceaccount scoped to any namespace 
-
-- kubectl create namespace dev
-
-- kubectl create sa testsa -n dev
+```sh
+kubectl create namespace dev
+```
+```sh
+kubectl create sa testsa -n dev
+```
 
 #### Creating Long-Lived Token
 
 > **Create a secret and specify the name of the service account as annotations within the metadata section.**
 
-```
-vi testsa-secret.yaml 
-
+```yaml
+#vi testsa-secret.yaml 
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -28,16 +30,17 @@ metadata:
        kubernetes.io/service-account.name: testsa
 type: kubernetes.io/service-account-token
 
-save & close the file
-
-kubectl apply -f testsa-secret.yaml
+#save & close the file
+#kubectl apply -f testsa-secret.yaml
 ```
 
 ## get the secret associated with serviceaccount 
 
-`kubectl describe serviceaccount testsa -n dev`
-
+```sh
+kubectl describe serviceaccount testsa -n dev
 ```
+
+```sh
 root@mnode:~# kubectl describe sa testsa
 Name:                testsa
 Namespace:           dev
@@ -51,9 +54,11 @@ Events:              <none>
 
 ## Token Value is our secrect
 
-`kubectl describe secret testsa-secret -n dev`
-
+```sh
+kubectl describe secret testsa-secret -n dev
 ```
+
+```sh
 root@mnode:~# kubectl describe secret testsa-secret
 Name:         testsa-token
 Namespace:    dev
@@ -73,9 +78,13 @@ token:   eyJhbGciOiJSUzI1NiIsImtpZCI6IkpoMGpiWFUtVmRUcFhKNFItQ2Y2b3NiUHRFbzJSaEt
 #### as we can see above the screct is associated with ca.crt & a token, we can extract them and use in `config` file to connect to the cluster 
 
 ### Follow below to extract the values 
-```
+```sh
 kubectl -n dev get secret/testsa-token-bg4xc -o jsonpath='{.data.ca\.crt}' > ca.crt
+```
+```sh
 kubectl -n dev get secret/testsa-token -o jsonpath='{.data.token}' | base64 --decode > testsa.key
+```
+```sh
 kubectl get secret/testsa-token-bg4xc -o jsonpath='{.data.namespace}' | base64 --decode
 ```
 
@@ -85,7 +94,7 @@ kubectl get secret/testsa-token-bg4xc -o jsonpath='{.data.namespace}' | base64 -
 
 `vi testuser.conf`
 
-```
+```yaml
 apiVersion: v1
 kind: Config
 clusters:
@@ -110,7 +119,7 @@ users:
 
 ` more testuser.conf `
 
-```
+```yaml
 apiVersion: v1
 kind: Config
 clusters:
@@ -152,8 +161,8 @@ Error from server (Forbidden): nodes is forbidden: User "system:serviceaccount:k
 
 ### define a Role -- what can be done 
 
-```
-vi testsa-role.yaml 
+```yaml
+#vi testsa-role.yaml 
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -166,16 +175,16 @@ rules:
     verbs: ["get", "watch", "list"]
     #verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
-save, close the file & apply 
+#save, close the file & apply 
 
-kubectl apply -f testsa-role.yaml
+#kubectl apply -f testsa-role.yaml
 
 ``` 
 
 ### define a rolebinding ( bind role to a user/serviceaccount, gives the user set of permmissions )
 
-```
-vi testsa-rb.yaml
+```yaml
+#vi testsa-rb.yaml
 
 apiVersion: rbac.authorization.k8s.io/v1
 # This role binding allows "testuser" to read pods in the "kube-system" namespace.
@@ -192,21 +201,28 @@ roleRef:
   name: readonly-role # this must match the name of the Role or ClusterRole you wish to bind to
   apiGroup: rbac.authorization.k8s.io
 
-save,close & apply the file 
+#save,close & apply the file 
 
-kubectl apply -f testsa-rb.yaml
+#kubectl apply -f testsa-rb.yaml
 ```
 
 ## validate able to list deployments, pods replicasets 
-
+```sh
+kubectl --kubeconfig testuser.conf get deployment
 ```
+```sh
+# output
 root@kube-master:/home/devops/.kube# kubectl --kubeconfig testuser.conf get deployment
 NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
 calico-kube-controllers   1/1     1            1           3d19h
 coredns                   2/2     2            2           3d19h
 ```
 
+```sh
+kubectl --kubeconfig testuser.conf get replicaset
 ```
+```sh
+# output
 root@kube-master:/home/devops/.kube# kubectl --kubeconfig testuser.conf get replicaset
 NAME                                 DESIRED   CURRENT   READY   AGE
 calico-kube-controllers-778676476b   1         1         1       3d19h
