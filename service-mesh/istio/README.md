@@ -29,5 +29,5 @@
 
 > **The `control plane` takes your desired configuration, and its view of the services, and dynamically programs the proxy servers, updating them as the rules or the environment changes.**
 
->>> ![with-without-service-mesh](https://github.com/lerndevops/kubernetes-security/blob/main/img/with-without-service-mesh.png)
+>>>>>> ![with-without-service-mesh](https://github.com/lerndevops/kubernetes-security/blob/main/img/with-without-service-mesh.png)
 
