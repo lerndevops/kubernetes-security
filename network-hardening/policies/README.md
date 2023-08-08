@@ -12,6 +12,19 @@
 
 >> **simply creating the resource without a controller to implement it will have no effect**
 
+## Ingress vs Egress
+
+#### **Network policies can be used to specify both allowed ingress to pods and allowed egress from pods. These specifications work as one would expect:**
+
+> **traffic to a pod from an external network endpoint outside the cluster is allowed if ingress from that endpoint is allowed to the pod.**
+
+> **traffic from a pod to an external network endpoint outside the cluster is allowed if egress is allowed from the pod to that endpoint.**
+
+> **traffic from one pod (A) to another (B) is allowed if and only if egress is allowed from A to B and ingress is allowed to B from A.**
+
+>>> ***Note that controls are unidirectional – for traffic from B to be allowed to initiate a connection to A, egress must be allowed from B to A and ingress to B& from A.***
+
+
 ## Working with Network Policies 
 
 1) [deny-all-ingress-and-egress-in-a-namespace-then-allow-neccessary]
