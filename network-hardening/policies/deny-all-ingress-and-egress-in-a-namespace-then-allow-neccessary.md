@@ -150,22 +150,23 @@ kubectl apply -f allow-egress-from-spring-app-to-mongodb-pods-only.yaml
 kubectl exec -it springboot-app-6487b976bb-qqr2r -- /bin/sh
 ```
 
-```
-# Exec into one of the app pods to validate
+```sh
+# check the following results
 
 root@test-vm:~/netpol# kubectl exec -it springboot-app-6487b976bb-qqr2r -- /bin/sh
 
-/opt/app # curl 192.168.227.80:27017
+/opt/app # curl 192.168.227.80:27017    # DB-Pod-IP:port
 It looks like you are trying to access MongoDB over HTTP on the native driver port.
 
-/opt/app # curl 10.105.188.12:27017
+/opt/app # curl 10.105.188.12:27017     # DB-Service-IP:port
 It looks like you are trying to access MongoDB over HTTP on the native driver port.
-
-/opt/app # curl mongo:27017
+```
+```sh
+/opt/app # curl mongo:27017             # DB-Service-Name:Port
 curl: (6) Could not resolve host: mongo
 ```
 
-## Step 6: Lets the Change the default deny all policy as below 
+## Step 6: Lets Change the deny all policy as below 
 ```yaml
 ## vi deny-all-traffic-default-ns.yaml
 apiVersion: networking.k8s.io/v1
@@ -196,3 +197,5 @@ spec:
 kubectl apply -f deny-all-traffic-default-ns.yaml
 ```
 > **Now, we should see all working**
+
+>>> **`Important Note:` Since network policies are namespaced resources, you will need to create this policy for each namespace**

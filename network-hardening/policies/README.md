@@ -27,4 +27,4 @@
 
 ## Working with Network Policies 
 
-1) [deny-all-ingress-and-egress-in-a-namespace-then-allow-neccessary]
+1) [deny-all-ingress-and-egress-in-a-namespace-then-allow-neccessary](https://github.com/lerndevops/kubernetes-security/blob/main/network-hardening/policies/deny-all-ingress-and-egress-in-a-namespace-then-allow-neccessary.md)
