@@ -31,3 +31,24 @@
 
 >>>>>> ![with-without-service-mesh](https://github.com/lerndevops/kubernetes-security/blob/main/img/with-without-service-mesh.png)
 
+## Install istio 
+
+>> https://istio.io/latest/docs/setup/getting-started/
+
+## Istio Profiles 
+
+>> https://istio.io/latest/docs/setup/additional-setup/config-profiles/ 
+
+## Istio Integrations
+
+>> https://istio.io/latest/docs/ops/integrations/
+
+## Inject Istio Envoy Proxy to Pods 
+
+> **Add a namespace label to instruct Istio to automatically inject Envoy sidecar proxies when you deploy your application later:**
+
+```sh
+kubectl label namespace default istio-injection=enabled
+```
+
+>>> **`Note:` the above we labeled the defualt namespace, choose your namespace accordingly**
