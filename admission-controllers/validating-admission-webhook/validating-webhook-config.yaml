@@ -5,7 +5,7 @@ metadata:
   namespace: default
 webhooks:
   - name: validating-webhook-demo.default.svc
-    admissionReviewVersions: ["v1"]
+    admissionReviewVersions: ["v1beta1"]
     sideEffects: None
     clientConfig:
       service:
