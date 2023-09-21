@@ -5,8 +5,8 @@
 ## step1: create a private/public keypair 
 
 ```
-mkdir -p /home/certs
-cd /home/certs
+mkdir -p $HOME/certs
+cd $HOME/certs
 ```
 
 > **Create a private key for your user. In this example, we will name the file user1.key:**
