@@ -1,0 +1,135 @@
+The previous step failed because kubernetes have NamespaceExists admission controller enabled which rejects requests to namespaces that do not exist. So, to create a namespace that does not exist automatically, we could enable the NamespaceAutoProvision admission controller
+
+Note that the NamespaceExists and NamespaceAutoProvision admission controllers are deprecated and now replaced by NamespaceLifecycle admission controller.
+
+The NamespaceLifecycle admission controller will make sure that requests
+to a non-existent namespace is rejected and that the default namespaces such as
+default, kube-system and kube-public cannot be deleted.
+
+ps -ef | grep kube-apiserver | grep admission-plugins
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-server
+  namespace: webhook-demo
+  labels:
+    app: webhook-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook-server
+  template:
+    metadata:
+      labels:
+        app: webhook-server
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1234
+      containers:
+      - name: server
+        image: stackrox/admission-controller-webhook-demo:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8443
+          name: webhook-api
+        volumeMounts:
+        - name: webhook-tls-certs
+          mountPath: /run/secrets/tls
+          readOnly: true
+      volumes:
+      - name: webhook-tls-certs
+        secret:
+          secretName: webhook-server-tls
+
+piVersion: v1
+kind: Service
+metadata:
+  name: webhook-server
+  namespace: webhook-demo
+spec:
+  selector:
+    app: webhook-server
+  ports:
+    - port: 443
+      targetPort: webhook-api
+
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: demo-webhook
+webhooks:
+  - name: webhook-server.webhook-demo.svc
+    clientConfig:
+      service:
+        name: webhook-server
+        namespace: webhook-demo
+        path: "/mutate"
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURQekNDQWllZ0F3SUJBZ0lVSEZGNEYrcTRSUHdIWDJ0OS93SkhRQXplVFkwd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0x6RXRNQ3NHQTFVRUF3d2tRV1J0YVhOemFXOXVJRU52Ym5SeWIyeHNaWElnVjJWaWFHOXZheUJFWlcxdgpJRU5CTUI0WERUSXpNRGd3TVRFMU5UYzFNMW9YRFRJek1EZ3pNVEUxTlRjMU0xb3dMekV0TUNzR0ExVUVBd3drClFXUnRhWE56YVc5dUlFTnZiblJ5YjJ4c1pYSWdWMlZpYUc5dmF5QkVaVzF2SUVOQk1JSUJJakFOQmdrcWhraUcKOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTBoclNMTDF0RVVaUnVFZGxwQzdHcEVLQ1N3bXprYTNhNm5HSApGZ2t3NDNqYzdZeFZ4bWdJVDRhV1BYL3cyQ1g0WjhmMDFRbk56YXNvTkdINWw0dFBldTdISGx4dDUwVDZBTHUrCnh5cmcxalhUS1ByMUE2ZytzazA2WmpBYXdWTGY2SHRuVHdpT3RnREZqeWp4R1huTmhpVXJza1Vtejc5eDRVbXQKYVhsclhVSzUwcXFaZkN1SVpMOEtmVlQ1NUhOaFRTRTVKUlp6dTZFZ1FVRGxhUDN3cmJIUzB3Y3g0anZERkU2OQovbHoxNGF2NDZidVJiWnFwdUY3Z3FKejBMNkM1Q0RLd1hTMVRlQkFpZ3ZQRzZPbGQvQUIzN0YxOWcvWUt4bU9rCjZhYTJ2OXJVdk1CQ3NjMlNFOXRpNGR0cUg3SlBNczJKUWhmMUIwY2J4akJUSHZDTWRRSURBUUFCbzFNd1VUQWQKQmdOVkhRNEVGZ1FVRURNMVEzN1U2Yk5Tb1pmK3N3Uml5MWNmaC9Bd0h3WURWUjBqQkJnd0ZvQVVFRE0xUTM3VQo2Yk5Tb1pmK3N3Uml5MWNmaC9Bd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3Foa2lHOXcwQkFRc0ZBQU9DCkFRRUF6NGVjNTAzZU1YdHpPYk9rVEM5YytIaDNMdkl4dEkwVGdnMXJqZGZabExDU3dYWmI4SGRoY2NobWgreDIKcWdLRVA0VURKK1Y3NzdRRk9pYmRaS2FhYzFzSlI5VVBHTE4rK2E4b3JPRE5LdWtPWk5udzJYeHZHVDFuQnJYeQpSWGEvQ2RnVmpJa2JlQkJxS1plZlNmZ0gvYVN2SGhpbG1jbDJyS3MwR05kUjkwTzl5Uldrc1dXMEJBVThhQ1VwCmNqdjZMdWJjMWRvQ1RzWCtLbjZVOFlqNyt1bllFTHJ0c3hSYWNpU3JXZy9URlVMVEFSbHNZQjlQTVc5dkZrNlYKa2JKQ1VCQXZScCtYQVZwcWJwdm5TeTVIUG8rYi9PSGhGQlNFVmpJZ1Z2VFBNaHVRVW1KRmpIdTl5QjVXYzRqSApySHdQcTlLLzlTRGhiZmlPaGw0dEdpRFFtQT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    admissionReviewVersions: ["v1beta1"]
+    sideEffects: None
+
+# A pod with no securityContext specified.
+# Without the webhook, it would run as user root (0). The webhook mutates it
+# to run as the non-root user with uid 1234.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-defaults
+  labels:
+    app: pod-with-defaults
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - name: busybox
+      image: busybox
+      command: ["sh", "-c", "echo I am running as user $(id -u)"]
+
+# A pod with a securityContext explicitly allowing it to run as root.
+# The effect of deploying this with and without the webhook is the same. The
+# explicit setting however prevents the webhook from applying more secure
+# defaults.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-override
+  labels:
+    app: pod-with-override
+spec:
+  restartPolicy: OnFailure
+  securityContext:
+    runAsNonRoot: false
+  containers:
+    - name: busybox
+      image: busybox
+      command: ["sh", "-c", "echo I am running as user $(id -u)"]
+
+# A pod with a conflicting securityContext setting: it has to run as a non-root
+# user, but we explicitly request a user id of 0 (root).
+# Without the webhook, the pod could be created, but would be unable to launch
+# due to an unenforceable security context leading to it being stuck in a
+# 'CreateContainerConfigError' status. With the webhook, the creation of
+# the pod is outright rejected.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-conflict
+  labels:
+    app: pod-with-conflict
+spec:
+  restartPolicy: OnFailure
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 0
+  containers:
+    - name: busybox
+      image: busybox
+      command: ["sh", "-c", "echo I am running as user $(id -u)"]
